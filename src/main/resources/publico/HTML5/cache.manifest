@@ -1,0 +1,18 @@
+CACHE MANIFEST
+# 2010-06-18:v2
+
+# Explicitly cached 'master entries'.
+CACHE:
+/HTML5/Paste.html
+https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
+https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
+
+
+NETWORK:
+https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
+https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
+/savePaste.js
+/
+
