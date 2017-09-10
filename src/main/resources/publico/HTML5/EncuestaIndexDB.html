@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Encuesta</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script>
+        //dependiendo el navegador busco la referencia del objeto.
+        var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
+
+        //indicamos el nombre y la versión
+        var dataBase = indexedDB.open("encuesta_db", 1);
+
+        //se ejecuta la primera vez que se crea la estructura
+        //o se cambia la versión de la base de datos.
+        dataBase.onupgradeneeded = function (e) {
+            console.log("Creando la estructura de la tabla");
+
+            //obteniendo la conexión activa
+            active = dataBase.result;
+
+            //creando la colección:
+            //En este caso, la colección, tendrá un ID autogenerado.
+            var encuestas = active.createObjectStore("encuestas", {keyPath: 'nombre', autoIncrement: false});
+
+            //creando los indices. (Dado por el nombre, campo y opciones)
+            encuestas.createIndex('por_nombre', 'nombre', {unique: true});
+
+        };
+
+        //El evento que se dispara una vez, lo
+        dataBase.onsuccess = function (e) {
+            console.log('Proceso ejecutado de forma correctamente');
+        };
+
+        dataBase.onerror = function (e) {
+            console.error('Error en el proceso: ' + e.target.errorCode);
+        };
+
+
+        function getDate(fecha) {
+            var fechaDeHoy = new Date().getTime() / 1000;
+            switch (fecha) {
+                case "10 minutes":
+                    return (10 * 60) + fechaDeHoy;
+                case "15 minutes":
+                    return (15 * 60) + fechaDeHoy;
+                case "20 minutes":
+                    return (20 * 60) + fechaDeHoy;
+                case "30 minutes":
+                    return (30 * 60) + fechaDeHoy;
+                case "1 hour":
+                    return (60 * 60) + fechaDeHoy;
+                case "1 day":
+                    return (24 * 60 * 60) + fechaDeHoy;
+                case "1 week":
+                    return 7 * 24 * 60 * 60 + fechaDeHoy;
+                case "never":
+                    var sDate1 = "31/12/9999";
+                    var date = []
+                    date = sDate1.split("/");
+                    var newDate = new Date(date[2], date[0] - 1, date[1]).getTime()
+                    return newDate;
+                default:
+                    return 0;
+            }
+
+        }
+
+        function agregarEncuesta() {
+            var dbActiva = dataBase.result; //Nos retorna una referencia al IDBDatabase.
+
+            //Para realizar una operación de agreagr, actualización o borrar.
+            // Es necesario abrir una transacción e indicar un modo: readonly, readwrite y versionchange
+            var transaccion = dbActiva.transaction(["encuestas"], "readwrite");
+
+            //Manejando los errores.
+            transaccion.onerror = function (e) {
+                alert(request.error.name + '\n\n' + request.error.message);
+            };
+
+            transaccion.oncomplete = function (e) {
+                document.querySelector("#nombre").value = '';
+                alert('Objeto agregado correctamente');
+            };
+
+            //abriendo la colección de datos que estaremos usando.
+            var encuestas = transaccion.objectStore("encuestas");
+
+            //Para agregar se puede usar add o put, el add requiere que no exista
+            // el objeto.
+
+            var request = encuestas.put({
+                nombre: document.querySelector("#nombre").value,
+                sector: document.querySelector("#sector").value,
+                nivelEscolar: document.querySelector("#nivelEscolar").value,
+                latitude: document.querySelector("#latitude").value,
+                longitud: document.querySelector("#longitud").value
+                // geoLocalizacion: document.querySelector("#geolocalizacion").value,
+                //fechaPublicacion: new Date().toString()
+            });
+
+            request.onerror = function (e) {
+                var mensaje = "Error: " + e.target.errorCode;
+                console.error(mensaje);
+                alert(mensaje)
+            };
+
+            request.onsuccess = function (e) {
+                console.log("Datos Procesado con exito");
+                document.querySelector("#nombre").value = "";
+                document.querySelector("#sector").value = "";
+                document.querySelector("#nivelEscolar").value = "";
+                document.querySelector("latitude").value= "";
+                document.querySelector("longitud").value="";
+                // document.querySelector("#geoLocalizacion").value = "";
+                //document.querySelector("#fechaPublicacion").value = "";
+            };
+        }
+
+        /**
+         * Permite listar todos los datos digitados.
+         */
+        function listarDatos() {
+
+            //por defecto si no lo indico el tipo de transacción será readonly
+            var data = dataBase.result.transaction(["encuestas"]);
+            var encuestas = data.objectStore("encuestas");
+            var contador = 0;
+            var encuestas_recuperados = [];
+
+            //abriendo el cursor.
+            encuestas.openCursor().onsuccess = function (e) {
+                //recuperando la posicion del cursor
+                var cursor = e.target.result;
+                if (cursor) {
+                    contador++;
+                    //recuperando el objeto.
+                    encuestas_recuperados.push(cursor.value);
+
+                    //Función que permite seguir recorriendo el cursor.
+                    cursor.continue();
+
+                } else {
+                    console.log("La cantidad de registros recuperados es: " + contador);
+                }
+            };
+
+            //Una vez que se realiza la operación llamo la impresión.
+            data.oncomplete = function () {
+                imprimirTabla(encuestas_recuperados);
+            }
+
+        }
+
+
+        /**
+         *
+         * @param lista_pastes
+         */
+        function imprimirTabla(lista_encuestas) {
+            //creando la tabla...
+            var tabla = document.createElement("table");
+            var filaTabla = tabla.insertRow();
+            filaTabla.insertCell().textContent = "nombre";
+            filaTabla.insertCell().textContent = "sector";
+            filaTabla.insertCell().textContent = "nivel Escolar";
+            //filaTabla.insertCell().textContent = "Geo Localizacion";
+
+
+            for (var key in lista_encuestas) {
+                //
+                filaTabla = tabla.insertRow();
+                filaTabla.insertCell().textContent = "" + lista_pastes[key].nombre;
+                filaTabla.insertCell().textContent = "" + lista_pastes[key].sector;
+                filaTabla.insertCell().textContent = "" + lista_pastes[key].nivelEscolar;
+                //filaTabla.insertCell().textContent = ""+lista_pastes[key].geoLocalizacion;
+            }
+
+            document.getElementById("listaEncuestas").innerHTML = "";
+            document.getElementById("listaEncuestas").appendChild(tabla);
+        }
+
+
+        /**
+         *
+         */
+        function buscarEncuesta() {
+
+            //recuperando el id.
+            var titulo = prompt("Indique el nombre de la encuesta");
+            console.log("titulo digitado: " + titulo);
+
+            //abriendo la transacción en modo readonly.
+            var data = dataBase.result.transaction(["encuestas"]);
+            var encuestas = data.objectStore("encuestas");
+
+            //buscando paste por la referencia al key.
+            encuestas.get(titulo).onsuccess = function (e) {
+
+                var resultado = e.target.result;
+                console.log("los datos: " + resultado);
+
+                if (resultado !== undefined) {
+
+                    var p = document.createElement("p");
+                    p.appendChild(document.createTextNode("" + JSON.stringify(resultado)));
+                    console.log(JSON.stringify(resultado));
+                    document.getElementById("listaEncuestas").innerHTML = "";
+                    document.getElementById("listaEncuestas").appendChild(p);
+                } else {
+                    console.log("Paste no encontrado...");
+                }
+            };
+
+        }
+
+
+        /* function buscarPasteSintaxis() {
+
+             var consultaSintaxis = prompt("Indique la sintaxis");
+             console.log("El sintaxis consultado: " +consultaSintaxis);
+             if(consultaSintaxis === undefined){
+                 return;
+             }
+
+             //por defecto si no lo indico el tipo de transacción será readonly
+             var data = dataBase.result.transaction(["pastes"]);
+             var pastes = data.objectStore("pastes");
+             var contador = 0;
+             var pastes_recuperados=[];
+
+             //buscando la referencia por el indice.
+             var indice = pastes.index("por_sintaxis");
+
+             //determinando la forma de la consulta
+             var singleKeyRange = IDBKeyRange.only(consultaSintaxis);
+
+             //abriendo el cursor.
+             indice.openCursor(singleKeyRange).onsuccess=function(e) {
+                 //recuperando la posicion del cursor
+                 var cursor = e.target.result;
+                 if(cursor){
+                     contador++;
+                     //recuperando el objeto.
+                     pastes_recuperados.push(cursor.value);
+
+                     //Función que permite seguir recorriendo el cursor.
+                     cursor.continue();
+
+                 }else {
+                     console.log("La cantidad de registros recuperados es: "+contador);
+                 }
+             };
+
+             //Una vez que se realiza la operación llamo la impresión.
+             data.oncomplete = function () {
+                 imprimirTabla(pastes_recuperados);
+             }
+
+         }*/
+
+        function borrarEncuesta() {
+
+            var titulo = prompt("Indique el sintaxis");
+            console.log("sintaxis digitada: " + titulo);
+
+            var data = dataBase.result.transaction(["encuestas"], "readwrite");
+            var encuestas = data.objectStore("encuestas");
+
+            encuestas.delete(titulo).onsuccess = function (e) {
+                console.log("Paste eliminado...");
+            };
+        }
+
+        /*function cambiarPaste() {
+
+            //recuperando el titulo.
+            var titulo = prompt("Indique el titulo");
+            console.log("titulo digitada: "+titulo);
+
+
+            //abriendo la transacción en modo escritura.
+            var data = dataBase.result.transaction(["pastes"],"readwrite");
+            var pastes = data.objectStore("pastes");
+
+            //buscando paste por la referencia al key.
+            pastes.get(titulo).onsuccess = function(e) {
+
+                var resultado = e.target.result;
+                console.log("los datos: "+JSON.stringify(resultado));
+
+                if(resultado !== undefined){
+                    document.querySelector("#titulo").value = resultado.titulo;
+                    document.querySelector("#bloqueDeCodigo").value = resultado.bloqueDeCodigo;
+                    document.querySelector("#sintaxis").value = resultado.sintaxis;
+                    document.querySelector("#tipoExposicion").value = resultado.tipoExposicion;
+                    document.querySelector("#fechaExpiracion").value = new Date(resultado.fechaExpiracion*1000);
+                }else{
+                    console.log("Pastes no encontrado...");
+                }
+            };
+
+        }*/
+
+        /*function guardarCambios(){
+            //abriendo la transacción en modo escritura.
+            var data = dataBase.result.transaction(["pastes"],"readwrite");
+            var pastes = data.objectStore("pastes");
+
+            //buscando paste por la referencia al key.
+            pastes.get(document.querySelector("#titulo").value).onsuccess = function(e) {
+
+                var resultado = e.target.result;
+                console.log("los datos: "+JSON.stringify(resultado));
+
+                if(resultado !== undefined){
+                     resultado.titulo= document.querySelector("#titulo").value;
+                    resultado.bloqueDeCodigo= document.querySelector("#bloqueDeCodigo").value ;
+                    resultado.sintaxis = document.querySelector("#sintaxis").value ;
+                    resultado.tipoExposicion = document.querySelector("#tipoExposicion").value ;
+                    resultado.fechaExpiracion = getDate(document.querySelector("#fechaExpiracion").value) ;
+                    resultado.cantidadVista = 0;
+
+                    var solicitudUpdate = pastes.put(resultado);
+
+                    //eventos.
+                    solicitudUpdate.onsuccess = function (e) {
+                        console.log("Datos Actualizados....");
+                    }
+
+                    solicitudUpdate.onerror = function (e) {
+                        console.error("Error Datos Actualizados....");
+                    }
+
+                }else{
+                    console.log("Pastes no encontrado...");
+                }
+            };
+        }*/
+
+    </script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/miEstilo.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/sunburst.css">
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/highlight.pack.js"></script>
+    <script type="text/javascript" src="/js/deletePaste.js"></script>
+    <script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <script src="/js/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+
+<div class="container">
+    <div class="caption">
+        <h3 style="text-align: right; margin-top:10%; margin-right: 37%; margin-bottom: 2%">Realizar Encuesta</h3>
+    </div>
+
+    <form action="" method="post">
+
+        <!--<input type="text" class="form-control" name="id" id="id">-->
+
+        <div class="row">
+            <div class="col-md-offset-4 col-md-5">
+                <div class="input-group input-group-md form-group">
+                    <span class="input-group-addon" id="sizing-addon1"><i class="glyphicon glyphicon-user"></i></span>
+                    <input type="text" class="form-control" name="nombre" placeholder="Entre el nombre de la encuesta"
+                           id="nombre" aria-describedby="sizing-addon1" size="10" pattern=".{4,}" required>
+                </div>
+            </div>
+
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col-md-offset-4 col-md-5">
+                <div class="input-group input-group-md form-group">
+                    <span class="input-group-addon" id="sizing-addon1"><i class="glyphicon glyphicon-globe"></i></span>
+                    <input type="text" class="form-control" name="sector" placeholder="Introducza el sector" id="sector"
+                           pattern=".{4,}" max="20" aria-describedby="sizing-addon1" required>
+                </div>
+            </div>
+
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-offset-4 col-md-5">
+                <div class="input-group input-group-md form-group">
+                    <span class="input-group-addon" id="sizing-addon1"><i
+                            class="glyphicon glyphicon-list-alt"></i></span>
+                    <select class="form-control" name="nivelEscolar" id="nivelEscolar" required>
+                        <option>Seleccionar el nivel escolar</option>
+                        <option>Basico</option>
+                        <option>Medio</option>
+                        <option>Grado Universitario</option>
+                        <option>Postgrado</option>
+                        <option>Doctorado</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <input type="hidden" class="form-control" name="latitude" id="latitude" aria-describedby="sizing-addon1"
+               size="10" pattern=".{4,}" required>
+
+        <input type="hidden" class="form-control" name="longitud" id="longitud" aria-describedby="sizing-addon1"
+               size="10" pattern=".{4,}" required>
+
+
+        <br>
+        <div class="row">
+            <div class="col-md-offset-4 col-md-5 form-group">
+                <button onclick="agregarEncuesta()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
+                        id="IngresoLog">Realizar Encuesta
+                </button>
+                <!--<div class="col-md-2">-->
+                <!--<button onclick="buscarPasteSintaxis()">Buscar Paste Por Sintaxis</button>-->
+                <!--</div>-->
+                <button onclick="borrarEncuesta()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
+                        id="BorrarLog">Borrar Encuesta
+                </button>
+
+                <button onclick="listarDatos()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
+                        id="ListarLog">Listar Encuestas
+                </button>
+
+                <button onclick="sincronizar()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
+                        id="sincronizar">Sincronizar
+                </button>
+
+                <!--<div class="col-md-2">-->
+                <!--<button onclick="cambiarPaste()">Modificar Paste</button>-->
+                <!--</div>-->
+                <!--<div class="col-md-2">-->
+                <!--<button onclick="guardarCambios()">guardarModificaciones</button>-->
+                <!--</div>-->
+            </div>
+        </div>
+
+        <br>
+    </form>
+</div>
+
+<div id="listaEncuesta"></div>
+
+</body>
+
+
+<!--<h1>Encuesta</h1>-->
+<!--<div class="container">-->
+<!--<div class="row">-->
+<!--<div class="col-md-offset-3 col-md-6">-->
+<!--<div class="form-group">-->
+<!--<label for="nombre">Title</label>-->
+<!--<input type="text" class="form-control" name="nombre" id="nombre"-->
+<!--placeholder="Enter the name here">-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+<!--<div class="row">-->
+<!--<div class="col-md-offset-3 col-md-6">-->
+<!--<div class="form-group">-->
+<!--<label for="sector">New Paste</label>-->
+<!--<textarea class="form-control"  name="sector" id="sector" cols="50"-->
+<!--rows="20" required></textarea>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+
+<!--<div class="row">-->
+<!--<div class="col-md-offset-3 col-md-6">-->
+<!--<div class="form-group">-->
+<!--<label for="nivelEscolar">Nivel Escolar</label>-->
+<!--<select class="form-control" name="nivelEscolar" id="nivelEscolar" required>-->
+<!--<option >Select One</option>-->
+<!--<option>Basico</option>-->
+<!--<option>Medio</option>-->
+<!--<option>Grado Universitario</option>-->
+<!--<option>Postgrado</option>-->
+<!--<option>Doctorado</option>-->
+<!--</select>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+
+<!--<div class="row">-->
+
+<!--<div class="col-md-2">-->
+<!--<button onclick="agregarEncuesta()">Agregar</button>-->
+<!--</div>-->
+<!--<div class="col-md-2">-->
+<!--<button onclick="listarDatos()">Listar Datos</button>-->
+<!--</div>-->
+<!--<div class="col-md-2">-->
+<!--<button onclick="buscarEncuesta()">Buscar Paste</button>-->
+
+<!--</div>-->
+<!--&lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
+<!--&lt;!&ndash;<button onclick="buscarPasteSintaxis()">Buscar Paste Por Sintaxis</button>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+<!--<div class="col-md-2">-->
+<!--<button onclick="borrarEncuesta()">Borrar Paste</button>-->
+<!--</div>-->
+<!--&lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
+<!--&lt;!&ndash;<button onclick="cambiarPaste()">Modificar Paste</button>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+<!--&lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
+<!--&lt;!&ndash;<button onclick="guardarCambios()">guardarModificaciones</button>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+<!--</div>-->
+
+<!--</div>-->
+
+
+<!--</body>-->
+
+<script>
+    //Geolocalizacion
+    var id, cantidad = 0;
+    //Indica las opciones para llamar al GPS.
+    var opcionesGPS = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+    }
+
+    $(document).ready(function () {
+        alert("Hiiiiiii")
+        console.log("Ejemplo de Geolocalizacion");
+
+        //Obteniendo la referencia directa.
+        navigator.geolocation.getCurrentPosition(function (geodata) {
+            var coordenadas = geodata.coords;
+            $("#posicionGps").text("Latitud: " + coordenadas.latitude + ", Longitud: " + coordenadas.longitude + ", Precisión: " + coordenadas.accuracy + " metros");
+
+
+            $('input[name="latitude"]').val(coordenadas.latitude);
+            $('input[name="longitud"]').val(coordenadas.longitude);
+
+        }, function () {
+            $("#posicionGps").text("No permite el acceso del API GEO");
+        }, opcionesGPS);
+
+        //Obteniendo el cambio de referencia.
+        id = navigator.geolocation.watchPosition(function (geodata) {
+            var coordenadas = geodata.coords;
+            $("#posicionGps2").text("Latitud: " + coordenadas.latitude + ", Longitud: " + coordenadas.longitude + ", Precisión: " + coordenadas.accuracy + " metros, cantidad: " + cantidad);
+            cantidad++;
+            if (cantidad >= 5) {
+                navigator.geolocation.clearWatch(id);
+                console.log("Finalizando la trama")
+            }
+        }, function (error) {
+            //recibe un objeto con dos propiedades: code y message.
+            $("#posicionGps2").text("No permite el acceso del API GEO. Codigo: " + error.code + ", mensaje: " + error.message);
+        });
+    });
+
+</script>
+</html>
