@@ -40,20 +40,13 @@ public class EncuestaServices extends GestionDb<Encuesta>  {
 //        return query.getResultList();
 //    }
 //
-//    public List<Paste> findLastPaste(int val1){
-//        EntityManager entityManager = getEntityManager();
-//        Query query= entityManager.createQuery( "select p from Paste p where p.tipoExposicion =:tipoexposicion ORDER BY p.cantidadVista DESC ");
-//        query.setParameter("tipoexposicion","public");
-//        if(val1<0){
-//            val1 =13+val1;
-//            query.setFirstResult(0);
-//            query.setMaxResults(val1);
-//        }else{
-//            query.setFirstResult(val1);
-//            query.setMaxResults(13);
-//        }
-//
-//        return query.getResultList();
-//    }
+    public List<Encuesta> findEncuesta(int page, int numberPerpage){
+        EntityManager entityManager = getEntityManager();
+        Query query= entityManager.createQuery( "select e from Encuesta e order by e.id DESC ");
+        int start = page*numberPerpage-numberPerpage;
+        query.setFirstResult(start);
+        query.setMaxResults(numberPerpage);
+        return query.getResultList();
+    }
 
 }

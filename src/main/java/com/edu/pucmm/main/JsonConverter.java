@@ -1,4 +1,4 @@
-package com.pucmm.practica4.main;
+package com.edu.pucmm.main;
 
 /**
  * Created by anyderre on 22/07/17.

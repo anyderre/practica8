@@ -39,35 +39,6 @@
         };
 
 
-        function getDate(fecha) {
-            var fechaDeHoy = new Date().getTime() / 1000;
-            switch (fecha) {
-                case "10 minutes":
-                    return (10 * 60) + fechaDeHoy;
-                case "15 minutes":
-                    return (15 * 60) + fechaDeHoy;
-                case "20 minutes":
-                    return (20 * 60) + fechaDeHoy;
-                case "30 minutes":
-                    return (30 * 60) + fechaDeHoy;
-                case "1 hour":
-                    return (60 * 60) + fechaDeHoy;
-                case "1 day":
-                    return (24 * 60 * 60) + fechaDeHoy;
-                case "1 week":
-                    return 7 * 24 * 60 * 60 + fechaDeHoy;
-                case "never":
-                    var sDate1 = "31/12/9999";
-                    var date = []
-                    date = sDate1.split("/");
-                    var newDate = new Date(date[2], date[0] - 1, date[1]).getTime()
-                    return newDate;
-                default:
-                    return 0;
-            }
-
-        }
-
         function agregarEncuesta() {
             var dbActiva = dataBase.result; //Nos retorna una referencia al IDBDatabase.
 
