@@ -6,8 +6,8 @@
 
     <persistence-unit name="MiUnidadPersistencia" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>com.pucmm.practica4.entidades.Paste</class>
-        <class>com.pucmm.practica4.entidades.Usuario</class>
+        <class>com.edu.pucmm.entidades.Encuesta</class>
+
 
         <properties>
             <!--<property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test" />-->
