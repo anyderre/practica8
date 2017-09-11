@@ -42,7 +42,7 @@ public class Main {
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
 
-            return new ModelAndView(model, "Encuesta.ftl");
+            return new ModelAndView(model, "EncuestaIndexDB.html");
         }, freeMarkerEngine);
 
         path("/api", () -> {
