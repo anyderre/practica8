@@ -27,10 +27,10 @@
 
 <div class="container">
     <div class="caption">
-        <h3 style="text-align: right; margin-top:10%; margin-right: 37%; margin-bottom: 2%">Realizar Encuesta</h3>
+        <h3 style="text-align: right;color: white; margin-top:5%; margin-right: 37%; margin-bottom: 2%">Realizar Encuesta</h3>
     </div>
 
-    <form action="" method="post">
+    <form action="/" method="post">
 
         <!--<input type="text" class="form-control" name="id" id="id">-->
 
@@ -93,7 +93,7 @@
         <br>
         <div class="row">
             <div class="col-md-offset-4 col-md-5 form-group">
-                <button onclick="agregarEncuesta()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
+                <button onclick="agregarEncuesta()" type="submit" class="btn btn-lg btn-primary btn-block btn-signin form-control"
                         id="IngresoLog">Realizar Encuesta
                 </button>
                 <!--<div class="col-md-2">-->
@@ -111,12 +111,12 @@
                         id="sincronizar">Sincronizar
                 </button>
 
-                <!--<div class="col-md-2">-->
-                <!--<button onclick="cambiarPaste()">Modificar Paste</button>-->
-                <!--</div>-->
-                <!--<div class="col-md-2">-->
-                <!--<button onclick="guardarCambios()">guardarModificaciones</button>-->
-                <!--</div>-->
+
+                <button onclick="cambiarPaste()" class="btn btn-lg btn-primary btn-block btn-signin form-control" id="modificar" >Modificar Paste</button>
+
+
+                <button onclick="guardarCambios()" class="btn btn-lg btn-primary btn-block btn-signin form-control" id="guardarModificacion">guardarModificaciones</button>
+
             </div>
         </div>
 
@@ -127,75 +127,6 @@
 <div id="listaEncuesta"></div>
 
 </body>
-
-
-<!--<h1>Encuesta</h1>-->
-<!--<div class="container">-->
-<!--<div class="row">-->
-<!--<div class="col-md-offset-3 col-md-6">-->
-<!--<div class="form-group">-->
-<!--<label for="nombre">Title</label>-->
-<!--<input type="text" class="form-control" name="nombre" id="nombre"-->
-<!--placeholder="Enter the name here">-->
-<!--</div>-->
-<!--</div>-->
-<!--</div>-->
-<!--<div class="row">-->
-<!--<div class="col-md-offset-3 col-md-6">-->
-<!--<div class="form-group">-->
-<!--<label for="sector">New Paste</label>-->
-<!--<textarea class="form-control"  name="sector" id="sector" cols="50"-->
-<!--rows="20" required></textarea>-->
-<!--</div>-->
-<!--</div>-->
-<!--</div>-->
-
-<!--<div class="row">-->
-<!--<div class="col-md-offset-3 col-md-6">-->
-<!--<div class="form-group">-->
-<!--<label for="nivelEscolar">Nivel Escolar</label>-->
-<!--<select class="form-control" name="nivelEscolar" id="nivelEscolar" required>-->
-<!--<option >Select One</option>-->
-<!--<option>Basico</option>-->
-<!--<option>Medio</option>-->
-<!--<option>Grado Universitario</option>-->
-<!--<option>Postgrado</option>-->
-<!--<option>Doctorado</option>-->
-<!--</select>-->
-<!--</div>-->
-<!--</div>-->
-<!--</div>-->
-
-<!--<div class="row">-->
-
-<!--<div class="col-md-2">-->
-<!--<button onclick="agregarEncuesta()">Agregar</button>-->
-<!--</div>-->
-<!--<div class="col-md-2">-->
-<!--<button onclick="listarDatos()">Listar Datos</button>-->
-<!--</div>-->
-<!--<div class="col-md-2">-->
-<!--<button onclick="buscarEncuesta()">Buscar Paste</button>-->
-
-<!--</div>-->
-<!--&lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
-<!--&lt;!&ndash;<button onclick="buscarPasteSintaxis()">Buscar Paste Por Sintaxis</button>&ndash;&gt;-->
-<!--&lt;!&ndash;</div>&ndash;&gt;-->
-<!--<div class="col-md-2">-->
-<!--<button onclick="borrarEncuesta()">Borrar Paste</button>-->
-<!--</div>-->
-<!--&lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
-<!--&lt;!&ndash;<button onclick="cambiarPaste()">Modificar Paste</button>&ndash;&gt;-->
-<!--&lt;!&ndash;</div>&ndash;&gt;-->
-<!--&lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
-<!--&lt;!&ndash;<button onclick="guardarCambios()">guardarModificaciones</button>&ndash;&gt;-->
-<!--&lt;!&ndash;</div>&ndash;&gt;-->
-<!--</div>-->
-
-<!--</div>-->
-
-
-<!--</body>-->
 
 <script>
 
@@ -231,35 +162,6 @@
         console.error('Error en el proceso: ' + e.target.errorCode);
     };
 
-
-    function getDate(fecha) {
-        var fechaDeHoy = new Date().getTime() / 1000;
-        switch (fecha) {
-            case "10 minutes":
-                return (10 * 60) + fechaDeHoy;
-            case "15 minutes":
-                return (15 * 60) + fechaDeHoy;
-            case "20 minutes":
-                return (20 * 60) + fechaDeHoy;
-            case "30 minutes":
-                return (30 * 60) + fechaDeHoy;
-            case "1 hour":
-                return (60 * 60) + fechaDeHoy;
-            case "1 day":
-                return (24 * 60 * 60) + fechaDeHoy;
-            case "1 week":
-                return 7 * 24 * 60 * 60 + fechaDeHoy;
-            case "never":
-                var sDate1 = "31/12/9999";
-                var date = []
-                date = sDate1.split("/");
-                var newDate = new Date(date[2], date[0] - 1, date[1]).getTime()
-                return newDate;
-            default:
-                return 0;
-        }
-
-    }
 
     function agregarEncuesta() {
         var dbActiva = dataBase.result; //Nos retorna una referencia al IDBDatabase.
@@ -310,8 +212,7 @@
             document.querySelector("#nivelEscolar").value = "";
             document.querySelector("#latitude").value= "";
             document.querySelector("#longitud").value="";
-            // document.querySelector("#geoLocalizacion").value = "";
-            //document.querySelector("#fechaPublicacion").value = "";
+
         };
     }
 
@@ -414,49 +315,6 @@
     }
 
 
-    /* function buscarPasteSintaxis() {
-
-         var consultaSintaxis = prompt("Indique la sintaxis");
-         console.log("El sintaxis consultado: " +consultaSintaxis);
-         if(consultaSintaxis === undefined){
-             return;
-         }
-
-         //por defecto si no lo indico el tipo de transacción será readonly
-         var data = dataBase.result.transaction(["pastes"]);
-         var pastes = data.objectStore("pastes");
-         var contador = 0;
-         var pastes_recuperados=[];
-
-         //buscando la referencia por el indice.
-         var indice = pastes.index("por_sintaxis");
-
-         //determinando la forma de la consulta
-         var singleKeyRange = IDBKeyRange.only(consultaSintaxis);
-
-         //abriendo el cursor.
-         indice.openCursor(singleKeyRange).onsuccess=function(e) {
-             //recuperando la posicion del cursor
-             var cursor = e.target.result;
-             if(cursor){
-                 contador++;
-                 //recuperando el objeto.
-                 pastes_recuperados.push(cursor.value);
-
-                 //Función que permite seguir recorriendo el cursor.
-                 cursor.continue();
-
-             }else {
-                 console.log("La cantidad de registros recuperados es: "+contador);
-             }
-         };
-
-         //Una vez que se realiza la operación llamo la impresión.
-         data.oncomplete = function () {
-             imprimirTabla(pastes_recuperados);
-         }
-
-     }*/
 
     function borrarEncuesta() {
 
@@ -471,56 +329,54 @@
         };
     }
 
-    /*function cambiarPaste() {
+    function cambiarPaste() {
 
         //recuperando el titulo.
-        var titulo = prompt("Indique el titulo");
-        console.log("titulo digitada: "+titulo);
+        var nombre = prompt("Indique el nombre");
+        console.log("titulo digitada: "+nombre);
 
 
         //abriendo la transacción en modo escritura.
-        var data = dataBase.result.transaction(["pastes"],"readwrite");
-        var pastes = data.objectStore("pastes");
+        var data = dataBase.result.transaction(["encuestas"],"readwrite");
+        var pastes = data.objectStore("encuestas");
 
         //buscando paste por la referencia al key.
-        pastes.get(titulo).onsuccess = function(e) {
+        pastes.get(nombre).onsuccess = function(e) {
 
             var resultado = e.target.result;
             console.log("los datos: "+JSON.stringify(resultado));
 
             if(resultado !== undefined){
-                document.querySelector("#titulo").value = resultado.titulo;
-                document.querySelector("#bloqueDeCodigo").value = resultado.bloqueDeCodigo;
-                document.querySelector("#sintaxis").value = resultado.sintaxis;
-                document.querySelector("#tipoExposicion").value = resultado.tipoExposicion;
-                document.querySelector("#fechaExpiracion").value = new Date(resultado.fechaExpiracion*1000);
+                document.querySelector("#nombre").value = resultado.nombre;
+                document.querySelector("#sector").value = resultado.sector;
+                document.querySelector("#nivelEscolar").value = resultado.nivelEscolar;
+
             }else{
                 console.log("Pastes no encontrado...");
             }
         };
 
-    }*/
+    }
 
-    /*function guardarCambios(){
+    function guardarCambios(){
         //abriendo la transacción en modo escritura.
-        var data = dataBase.result.transaction(["pastes"],"readwrite");
-        var pastes = data.objectStore("pastes");
+        var data = dataBase.result.transaction(["encuestas"],"readwrite");
+        var encuestas = data.objectStore("encuestas");
 
         //buscando paste por la referencia al key.
-        pastes.get(document.querySelector("#titulo").value).onsuccess = function(e) {
+        encuestas.get(document.querySelector("#nombre").value).onsuccess = function(e) {
 
             var resultado = e.target.result;
             console.log("los datos: "+JSON.stringify(resultado));
 
             if(resultado !== undefined){
-                 resultado.titulo= document.querySelector("#titulo").value;
-                resultado.bloqueDeCodigo= document.querySelector("#bloqueDeCodigo").value ;
-                resultado.sintaxis = document.querySelector("#sintaxis").value ;
-                resultado.tipoExposicion = document.querySelector("#tipoExposicion").value ;
-                resultado.fechaExpiracion = getDate(document.querySelector("#fechaExpiracion").value) ;
-                resultado.cantidadVista = 0;
+                resultado.nombre= document.querySelector("#nombre").value;
+                resultado.sector= document.querySelector("#sector").value ;
+                resultado.nivelEscolar = document.querySelector("#nivelEscolar").value ;
+                resultado.latitude= document.querySelector("#latitude").value.toString();
+                resultado.longitud= document.querySelector("#longitud").value.toString();
 
-                var solicitudUpdate = pastes.put(resultado);
+                var solicitudUpdate = encuestas.put(resultado);
 
                 //eventos.
                 solicitudUpdate.onsuccess = function (e) {
@@ -532,10 +388,10 @@
                 }
 
             }else{
-                console.log("Pastes no encontrado...");
+                console.log("Encuesta no encontrada...");
             }
         };
-    }*/
+    }
 
     //Geolocalizacion
     var id, cantidad = 0;
