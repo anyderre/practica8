@@ -5,18 +5,16 @@ CACHE MANIFEST
 #Trama que indica que
 CACHE:
 #pasteIndexedDB.html
-/templates/Paste.ftl
-https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
-https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
-https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
-
+footer.ftl
+header.ftl
+nav.ftl
 
 NETWORK:
-https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
-https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
-https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
-/savePaste.js
-/
+publico/js/jquery-3.2.1.js
+publico/js/bootstrap.js
+
 
 FALLBACK:
-
+Encuesta.ftl /html5/offline.html
+publico/js/Controller/encuestaController.js /html5/offline.html
+publico/js/app.js /html5/offline.html
