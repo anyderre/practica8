@@ -39,8 +39,8 @@ public class Main {
 
         EncuestaServices e = EncuestaServices.getInstancia();
         List<Encuesta> encuestas= e.findEncuesta(0, 10);
-        System.out.println(encuestas.get(0).getNombre());
-        System.out.println(encuestas.get(1).getNombre());
+//        System.out.println(encuestas.get(0).getNombre());
+ //       System.out.println(encuestas.get(1).getNombre());
 
 //----------------------------Encuesta CRUD ----------------------------------------
         get("/", (request, response) -> {
