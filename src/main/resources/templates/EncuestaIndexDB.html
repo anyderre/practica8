@@ -139,58 +139,17 @@
 </body>
 
 <script>
-
 $(document).ready(function () {
     $("#sincronizar").click(function () {
-        listarDatos();
-    });
-});
-function sincronizar(lista){
-    if (navigator.onLine) {
-
-        console.log(lista);
-        for (var key in lista) {
-            console.log( lista[key].nombre+"/"+lista[key].sector+ "/"
-                + lista[key].nivelEscolar+"/"+lista[key].latitude+"/"+ lista[key].longitud);
-
-            $.ajax({
-                type: "POST",
-                url:'/encuesta/guardar',
-                dataType: "JSON",
-                contentType:"application/json; charset=utf-8",
-                data:JSON.stringify({
-                    nombre: lista[key].nombre,
-                    sector:lista[key].sector,
-                    nivelEscolar:lista[key].nivelEscolar,
-                    latitude: lista[key].latitude,
-                    longitude: lista[key].longitud
-
-                })
-                ,
-                success:(function (data) {
-                   alert(data.data)
-                }),
-                error :(function(data){
-                    alert(data.data)
-                })
-            });
-//            $.post( "/encuesta/guardar",
-//                {
-//                    nombre: lista[key].nombre,
-//                    sector:lista[key].sector,
-//                    nivelEscolar:lista[key].nivelEscolar,
-//                    latitude: lista[key].latitude,
-//                    longitude: lista[key].longitud
-//                })
-//                .done(function( data ) {
-//                    alert( "Data Loaded: " + data );
-//                });
+        if (navigator.onLine) {
+            listarDatos();
+        } else {
+            alert('Actualmente el navegador esta offline');
         }
 
-    } else {
-        alert('Actualmente el navegador esta offline');
-    }
-}
+    });
+});
+
     //dependiendo el navegador busco la referencia del objeto.
     var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
 
@@ -223,7 +182,38 @@ function sincronizar(lista){
         console.error('Error en el proceso: ' + e.target.errorCode);
     };
 
+function sincronizar(lista){
+        console.log(lista);
+        for (var key in lista) {
+            console.log( lista[key].nombre+"/"+lista[key].sector+ "/"
+                + lista[key].nivelEscolar+"/"+lista[key].latitude+"/"+ lista[key].longitud);
 
+            $.ajax({
+                type: "POST",
+                url:'/encuesta/guardar',
+                dataType: "JSON",
+                contentType:"application/json; charset=utf-8",
+                data:JSON.stringify({
+                    nombre: lista[key].nombre,
+                    sector:lista[key].sector,
+                    nivelEscolar:lista[key].nivelEscolar,
+                    latitude: lista[key].latitude,
+                    longitude: lista[key].longitud
+
+                })
+                ,
+                success:(function (data) {
+                    alert(data.data)
+                }),
+                error :(function(data){
+                    alert(data.data)
+                })
+            });
+
+        }
+        clearData();
+
+}
     function agregarEncuesta() {
         var dbActiva = dataBase.result; //Nos retorna una referencia al IDBDatabase.
 
@@ -390,6 +380,30 @@ function sincronizar(lista){
             console.log("Encuesta eliminado...");
         };
     }
+function clearData() {
+    var DBOpenRequest = indexedDB.open("encuesta_db", 1);
+
+    DBOpenRequest.onsuccess = function(event) {
+       console.log("base de datos inicializado")
+
+        // Clear all the data form the object store
+        // open a read/write db transaction, ready for clearing the data
+        var transaction = DBOpenRequest.result.transaction(["encuestas"], "readwrite");
+        var encuestas = transaction.objectStore("encuestas");
+
+        // create an object store on the transaction
+        var objectStore = transaction.objectStore("encuestas");
+
+        // Make a request to clear all the data out of the object store
+        var objectStoreRequest = objectStore.clear();
+
+        objectStoreRequest.onsuccess = function(event) {
+          console.log("Base de datos limpiado")
+        };
+    };
+
+
+};
 
     function cambiarPaste() {
 
