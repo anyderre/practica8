@@ -37,16 +37,80 @@ public class Main {
         configuration.setClassForTemplateLoading(Main.class, "/templates");
         FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine(configuration);
 
+        EncuestaServices e = EncuestaServices.getInstancia();
+        List<Encuesta> encuestas= e.findEncuesta(0, 10);
+        System.out.println(encuestas.get(0).getNombre());
+        System.out.println(encuestas.get(1).getNombre());
 
-//----------------------------Paste CRUD ----------------------------------------
+//----------------------------Encuesta CRUD ----------------------------------------
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
 
             return new ModelAndView(model, "EncuestaIndexDB.html");
         }, freeMarkerEngine);
+//--------------------------------------------------Eliminar Encuesta-----------------------------------
+        get("/encuesta/eliminar/:id", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+            long id =Long.parseLong(request.queryParams("id"));
+            EncuestaServices services = EncuestaServices.getInstancia();
+            services.delete(services.find(id));
+            response.redirect("/encuesta/listar");
+            return 0;
+        });
+//----------------------------------------------Editar Encuesta------------------------------------------
+        get("/encuesta/editar/:id", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+            EncuestaServices encuestaServices =EncuestaServices.getInstancia();
+            long id =Long.parseLong(request.queryParams("id"));
+            model.put("encuestas", encuestaServices.find(id));
 
+            return new ModelAndView(model, "EncuestaIndexDB.html");
+        }, freeMarkerEngine);
+
+
+        post("/encuesta/editar", (request, response) -> {
+            EncuestaServices encuestaServices =EncuestaServices.getInstancia();
+            String sector = request.queryParams("sector");
+            String nombre = request.queryParams("nombre");
+            String nivelEscolar= request.queryParams("nivelEscolar");
+            float latitude =Float.parseFloat(request.queryParams("latitude"));
+            float longitud =Float.parseFloat(request.queryParams("longitud"));
+            long id =Long.parseLong(request.queryParams("id"));
+            Encuesta encuesta = encuestaServices.find(id);
+            encuesta.setLatitude(latitude);
+            encuesta.setLongitude(longitud);
+            encuesta.setNivelEscolar(nivelEscolar);
+            encuesta.setNombre(nombre);
+            encuesta.setSector(sector);
+            encuestaServices.editar(encuesta);
+            response.redirect("/encuesta/listar");
+            return 0;
+        });
+
+//------------------------------------------Listar Encuesta-------------------------------------------
+        get("/encuesta/listar", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+
+            return new ModelAndView(model, "Encuesta.ftl");
+        }, freeMarkerEngine);
+//---------------------------------------------Guardar Encuesta---------------------------------------
+        post("/encuesta/guardar", Main.ACCEPT_TYPE, (request, response) -> {
+            Encuesta encuesta = new Gson().fromJson(request.body(), Encuesta.class);
+        //  System.out.println(request.params("longitude"));
+            System.out.println(encuesta.getLatitude());
+            System.out.println(encuesta.getLongitude());
+            System.out.println(encuesta.getSector());
+            System.out.println(encuesta.getNivelEscolar());
+            System.out.println(encuesta.getNombre());
+            EncuestaServices encuestaServices = EncuestaServices.getInstancia();
+
+            encuestaServices.crear(encuesta);
+            return "saved";
+
+        },JsonConverter.json());
+
+//---------------------------------------------Api Encuesta------------------------------------------------
         path("/api", () -> {
-            //Saving Paste
             get("/encuesta/buscar/size", (request, response) -> {
                 EncuestaServices encuestaServices = EncuestaServices.getInstancia();
                 return encuestaServices.findAll().size();
@@ -57,9 +121,11 @@ public class Main {
             }, JsonConverter.json());
             get("/encuesta/buscar/:page/:itemsPerPage",(request, response) -> {
                 EncuestaServices encuestaServices = EncuestaServices.getInstancia();
-                int page =Integer.parseInt( request.params("page"));
-                int items =Integer.parseInt(request.params("itemsPerPage"));
+                int page = Integer.parseInt( request.params("page"));
 
+                int items =Integer.parseInt(request.params("itemsPerPage"));
+                System.out.println(items+"///"+page);
+                System.out.println("encuestaServices.findEncuesta(page, items) = " + encuestaServices.findEncuesta(page, items).get(0).getNombre());
                 return encuestaServices.findEncuesta(page, items);
             },JsonConverter.json());
         });

@@ -42,7 +42,8 @@ public class EncuestaServices extends GestionDb<Encuesta>  {
 //
     public List<Encuesta> findEncuesta(int page, int numberPerpage){
         EntityManager entityManager = getEntityManager();
-        Query query= entityManager.createQuery( "select e from Encuesta e order by e.id DESC ");
+        Query query= entityManager.createQuery( "select e from Encuesta e");
+        page = page+1 ;
         int start = page*numberPerpage-numberPerpage;
         query.setFirstResult(start);
         query.setMaxResults(numberPerpage);

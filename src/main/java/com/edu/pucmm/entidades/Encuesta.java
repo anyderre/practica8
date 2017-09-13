@@ -12,32 +12,23 @@ import java.io.Serializable;
  * Created by anyderre on 10/09/17.
  */
 @Entity
-public class Encuesta implements Serializable
-{
+public class Encuesta implements Serializable {
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
-    @Size(min=2)
     private String nombre;
-    @NotNull
-    @Size(min=2)
+
     private String sector;
-    @NotNull
-    @Size(min=2)
+
     private String nivelEscolar;
 
-    private double latitude;
-    private double longitude;
+    private float latitude;
+    private float longitude;
 
-    public Encuesta(String nombre, String sector, String nivelEscolar, double latitude, double longitude) {
-        this.nombre = nombre;
-        this.sector = sector;
-        this.nivelEscolar = nivelEscolar;
-        this.latitude = latitude;
-        this.longitude = longitude;
+
+    public Encuesta() {
+
     }
 
     public long getId() {
@@ -46,6 +37,31 @@ public class Encuesta implements Serializable
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Encuesta(String nombre, String sector, String nivelEscolar, float latitude, float longitude) {
+        this.nombre = nombre;
+        this.sector = sector;
+        this.nivelEscolar = nivelEscolar;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public float getLatitude() {
+
+        return latitude;
+    }
+
+    public void setLatitude(float latitude) {
+        this.latitude = latitude;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.longitude = longitude;
     }
 
     public String getNombre() {
@@ -72,19 +88,4 @@ public class Encuesta implements Serializable
         this.nivelEscolar = nivelEscolar;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
 }

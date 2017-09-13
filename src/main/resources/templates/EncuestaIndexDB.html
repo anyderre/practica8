@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Encuesta</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-
+    <title>Ver Encuesta</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -14,12 +11,16 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css">
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/sunburst.css">
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/highlight.pack.js"></script>
-    <script type="text/javascript" src="/js/deletePaste.js"></script>
-    <script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+    <!--<script type="text/javascript" src="/js/jquery.min.js"></script>-->
+    <!--<script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>-->
     <script src="/js/jquery-ui.min.js" type="text/javascript"></script>
     <script src="/js/bootstrap.js" type="text/javascript"></script>
+    <script src="/js/angular.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -77,15 +78,15 @@
 
         <div class="row">
             <div class="col-md-offset-4 col-md-5">
-        <input type="number" readonly class="form-control" name="latitude" id="latitude" aria-describedby="sizing-addon1"
+        <input type="number"  class="form-control" name="latitude" id="latitude" aria-describedby="sizing-addon1"
                size="10" pattern=".{4,}" >
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-offset-4 col-md-5">
-        <input type="number" readonly class="form-control" name="longitud" id="longitud" aria-describedby="sizing-addon1"
-               size="10" pattern=".{4,}" >
+        <input type="number" class="form-control" name="longitud" id="longitud" aria-describedby="sizing-addon1"
+               size="10" pattern=".{4,}">
             </div>
         </div>
 
@@ -99,17 +100,7 @@
                 <!--<div class="col-md-2">-->
                 <!--<button onclick="buscarPasteSintaxis()">Buscar Paste Por Sintaxis</button>-->
                 <!--</div>-->
-                <button onclick="borrarEncuesta()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
-                        id="BorrarLog">Borrar Encuesta
-                </button>
 
-                <button onclick="listarDatos()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
-                        id="ListarLog">Listar Encuestas
-                </button>
-
-                <button onclick="sincronizar()" class="btn btn-lg btn-primary btn-block btn-signin form-control"
-                        id="sincronizar">Sincronizar
-                </button>
 
 
                 <button onclick="cambiarPaste()" class="btn btn-lg btn-primary btn-block btn-signin form-control" id="modificar" >Modificar Paste</button>
@@ -122,6 +113,25 @@
 
         <br>
     </form>
+
+    <div class="row">
+        <div class="col-md-offset-4 col-md-5">
+            <button onclick="borrarEncuesta()" class="btn btn-lg btn-primary btn-block btn-signin "
+                    id="BorrarLog">Borrar Encuesta
+            </button>
+
+            <a href="/encuesta/listar">
+                <button class="btn btn-lg btn-primary btn-block btn-signin"
+                        id="ListarLog">Listar Encuestas
+                </button>
+            </a>
+
+            <button  class="btn btn-lg btn-primary btn-block btn-signin"
+                    id="sincronizar">Sincronizar
+            </button>
+        </div>
+    </div>
+
 </div>
 
 <div id="listaEncuesta"></div>
@@ -130,6 +140,57 @@
 
 <script>
 
+$(document).ready(function () {
+    $("#sincronizar").click(function () {
+        listarDatos();
+    });
+});
+function sincronizar(lista){
+    if (navigator.onLine) {
+
+        console.log(lista);
+        for (var key in lista) {
+            console.log( lista[key].nombre+"/"+lista[key].sector+ "/"
+                + lista[key].nivelEscolar+"/"+lista[key].latitude+"/"+ lista[key].longitud);
+
+            $.ajax({
+                type: "POST",
+                url:'/encuesta/guardar',
+                dataType: "JSON",
+                contentType:"application/json; charset=utf-8",
+                data:JSON.stringify({
+                    nombre: lista[key].nombre,
+                    sector:lista[key].sector,
+                    nivelEscolar:lista[key].nivelEscolar,
+                    latitude: lista[key].latitude,
+                    longitude: lista[key].longitud
+
+                })
+                ,
+                success:(function (data) {
+                   alert(data.data)
+                }),
+                error :(function(data){
+                    alert(data.data)
+                })
+            });
+//            $.post( "/encuesta/guardar",
+//                {
+//                    nombre: lista[key].nombre,
+//                    sector:lista[key].sector,
+//                    nivelEscolar:lista[key].nivelEscolar,
+//                    latitude: lista[key].latitude,
+//                    longitude: lista[key].longitud
+//                })
+//                .done(function( data ) {
+//                    alert( "Data Loaded: " + data );
+//                });
+        }
+
+    } else {
+        alert('Actualmente el navegador esta offline');
+    }
+}
     //dependiendo el navegador busco la referencia del objeto.
     var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
 
@@ -247,7 +308,8 @@
 
         //Una vez que se realiza la operación llamo la impresión.
         data.oncomplete = function () {
-            imprimirTabla(encuestas_recuperados);
+            //imprimirTabla(encuestas_recuperados);
+            sincronizar(encuestas_recuperados);
         }
 
     }
